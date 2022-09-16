@@ -1,63 +1,68 @@
--- vim.cmd [[packadd packer.nvim]]
--- packer = require('packer')
--- packer.init()
--- ui = require('modules.ui.plugins')
--- -- plugins = require('modules.themes.plugins')
--- -- conf[1] = {
--- --     "catppuccin/nvim",
--- --     as = "catppuccin",
--- --     config = function()
--- --         local config = require('modules.themes.config')
--- --         config.catppuccin()
--- --     end
--- -- }
--- -- conf[2] = 
--- -- {
--- --     "goolord/alpha-nvim",
--- --     config = function ()
--- --         local config = require('modules.ui.config')
--- --         config.dashboard()
--- --     end
--- -- }
--- packer.use(
---     ui
--- )
--- -- packer.use(
--- -- )
-return require('packer').startup(function(use)
-    -- 在代碼大跨越時產生動畫提示游標起點位置
-    use {'edluffy/specs.nvim'}
+local packer = nil
+local function init()
+    if packer == nil then
+        packer = require 'packer'
+        packer.init {
+            disable_commands = true,
+            display = {
+                open_fn = function()
+                    local result, win, buf = require('packer.util').float {
+                        border = {{'╭', 'FloatBorder'}, {'─', 'FloatBorder'}, {'╮', 'FloatBorder'},
+                                  {'│', 'FloatBorder'}, {'╯', 'FloatBorder'}, {'─', 'FloatBorder'},
+                                  {'╰', 'FloatBorder'}, {'│', 'FloatBorder'}}
+                    }
+                    vim.api.nvim_win_set_option(win, 'winhighlight', 'NormalFloat:Normal')
+                    return result, win, buf
+                end
+            }
+        }
+    end
+
+    local use = packer.use
+    packer.reset()
+
+    use 'wbthomason/packer.nvim'
 
     use 'stevearc/dressing.nvim'
 
-    -- Theme
     use {
-        "catppuccin/nvim",
-        as = "catppuccin"
-
+        'catppuccin/nvim',
+        as = 'catppuccin'
     }
 
-    -- Treeview
     use {
         'kyazdani42/nvim-tree.lua',
-        requires = {'kyazdani42/nvim-web-devicons' -- optional, for file icons
-        },
-        tag = 'nightly' -- optional, updated every week. (see issue #1193)
+        requires = {'kyazdani42/nvim-web-devicons'},
+        tag = 'nightly',
+        config = function()
+            require('modules.UIConfig').nvimtreee();
+        end
     }
 
     -- 分頁
     use {
         'akinsho/bufferline.nvim',
         tag = "v2.*",
-        requires = 'kyazdani42/nvim-web-devicons'
+        requires = 'kyazdani42/nvim-web-devicons',
+        config = function()
+            require("bufferline").setup {
+                options = {
+                    -- 左侧让出 nvim-tree 的位置
+                    offsets = {{
+                        filetype = "NvimTree",
+                        text = " File Explorer",
+                        highlight = "Directory",
+                        text_align = "left"
+                    }}
+                }
+            }
+        end
     }
 
-    -- dashboard
     use {
         'goolord/alpha-nvim',
         config = function()
-            config = require('modules.ui.config')
-            config.dashboard()
+            require('modules.UIConfig').dashboard();
         end
     }
 
@@ -67,7 +72,12 @@ return require('packer').startup(function(use)
         requires = {
             'kyazdani42/nvim-web-devicons',
             opt = true
-        }
+        },
+        config = function()
+            require('lualine').setup({
+                theme = 'codedark'
+            })
+        end
     }
 
     use {'dstein64/nvim-scrollview'}
@@ -85,21 +95,83 @@ return require('packer').startup(function(use)
         'gelguy/wilder.nvim',
         config = function()
             -- config goes here
+            require('wilder').setup({
+                modes = {':', '/', '?'}
+            })
         end
     }
+
+    -- automatically highlighting other uses of the word
     use {'RRethy/vim-illuminate'}
 
     use {
         'nvim-treesitter/nvim-treesitter',
-        run = ':TSUpdate'
+        run = ':TSUpdate',
+        config = function()
+            require'nvim-treesitter.configs'.setup {
+                -- A list of parser names, or "all"
+                ensure_installed = {"python", "javascript", "css", "c", "cpp"},
+
+                -- Install parsers synchronously (only applied to `ensure_installed`)
+                sync_install = false,
+
+                -- Automatically install: missing parsers when entering buffer
+                auto_install = true,
+
+                -- List of parsers to ignore installing (for "all")
+                -- ignore_install = { "javascript" },
+
+                highlight = {
+                    -- `false` will disable the whole extension
+                    enable = true,
+
+                    -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
+                    -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
+                    -- the name of the parser)
+                    -- list of language that will be disabled
+                    -- disable = { "c", "rust" },
+
+                    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+                    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+                    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+                    -- Instead of true it can also be a list of languages
+                    additional_vim_regex_highlighting = false
+                }
+            }
+        end
     }
     use 'nvim-treesitter/nvim-treesitter-context'
 
     use {
         'nvim-telescope/telescope.nvim',
         tag = '0.1.0',
-        -- or                            , branch = '0.1.x',
-        requires = {{'nvim-lua/plenary.nvim'}}
+        -- or , branch = '0.1.x',
+        requires = {{'nvim-lua/plenary.nvim'}},
+        config = function()
+            -- You dont need to set any of these options. These are the default ones. Only
+            -- the loading is important
+            require('telescope').setup {
+                extensions = {
+                    fzf = {
+                        fuzzy = true, -- false will only do exact matching
+                        override_generic_sorter = true, -- override the generic sorter
+                        override_file_sorter = true, -- override the file sorter
+                        case_mode = "smart_case" -- or "ignore_case" or "respect_case"
+                        -- the default case_mode is "smart_case"
+                    },
+                    project = {
+                        base_dirs = {'C:\\Users\\LeeWe\\Documents\\GitHub'},
+                        hidden_files = true, -- default: false
+                        theme = "dropdown"
+                    }
+                }
+            }
+            -- To get fzf loaded and working with telescope, you need to call
+            -- load_extension, somewhere after setup function:
+            require('telescope').load_extension('fzf')
+
+            require'telescope'.load_extension('project')
+        end
     }
 
     use {
@@ -132,24 +204,47 @@ return require('packer').startup(function(use)
         end
     }
 
+    use {"norcalli/nvim-colorizer.lua"}
+
     use {
-        "norcalli/nvim-colorizer.lua"
+        'neoclide/coc.nvim',
+        branch = 'release'
     }
-
-    use 'wbthomason/packer.nvim' -- Package manager
-    -- use {
-    --     "williamboman/nvim-lsp-installer",
-    --     "neovim/nvim-lspconfig",
-    -- }
-
-    -- use {"hrsh7th/nvim-cmp"}
-
-    -- use "lukas-reineke/cmp-under-comparator"
-
-    use {'neoclide/coc.nvim', branch = 'release'}
 
     use 'wakatime/vim-wakatime'
 
     use 'famiu/bufdelete.nvim'
-end)
 
+    use {
+        'edluffy/specs.nvim',
+        config = function()
+            require('specs').setup {
+                show_jumps = true,
+                min_jump = 30,
+                popup = {
+                    delay_ms = 0, -- delay before popup displays
+                    inc_ms = 10, -- time increments used for fade/resize effects 
+                    blend = 10, -- starting blend, between 0-100 (fully transparent), see :h winblend
+                    width = 10,
+                    winhl = "PMenu",
+                    fader = require('specs').linear_fader,
+                    resizer = require('specs').shrink_resizer
+                },
+                ignore_filetypes = {},
+                ignore_buftypes = {
+                    nofile = true
+                }
+            }
+        end
+    }
+
+end
+
+local plugins = setmetatable({}, {
+    __index = function(_, key)
+        init()
+        return packer[key]
+    end
+})
+
+return plugins

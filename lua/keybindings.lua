@@ -8,7 +8,7 @@ local opt = {noremap = true, silent = true }
 map("n","<A-`>","<Cmd>NvimTreeToggle<CR>",opt)
 
 -- Tab
-map("n","<leader>1",":bn<CR>",opt)
+map("n","<C-`>",":bNext<CR>",opt)
 
 vim.cmd[[
     inoremap <silent><expr> <TAB>
