@@ -8,8 +8,7 @@ vim.cmd [[colorscheme catppuccin]]
 
 -- theme
 vim.g.catppuccin_flavour = "macchiato" -- latte, frappe, macchiato, mocha
-vim.g.sqlite_clib_path = "C:\\Users\\LeeWe\\AppData\\Local\\nvim\\lua\\dll\\sqlite3.dll"
-
+--vim.g.sqlite_clib_path = "C:\\Users\\LeeWe\\AppData\\Local\\nvim\\lua\\dll\\sqlite3.dll"
 local g = vim.g
 local cmd = vim.cmd
 

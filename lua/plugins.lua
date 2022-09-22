@@ -173,7 +173,7 @@ local function init()
                         -- the default case_mode is "smart_case"
                     },
                     project = {
-                        base_dirs = {'C:\\Users\\LeeWe\\Documents\\GitHub'},
+                        -- base_dirs = {'C:\\Users\\LeeWe\\Documents\\GitHub'},
                         hidden_files = true, -- default: false
                         theme = "dropdown"
                     }
