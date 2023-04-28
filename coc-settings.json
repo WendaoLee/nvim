@@ -1,4 +1,3 @@
 {
-  "python.pythonPath": "C:/Python310/python.exe",
-  "Lua.telemetry.enable": true
+  "Lua.telemetry.enable": false
 }
